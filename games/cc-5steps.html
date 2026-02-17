@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 编程修炼五步法</title>
+  <style>
+    :root { --bg: #000; --fg: #fff; --muted: #666; --accent: #2997ff; --border: #333; --red: #ff6b6b; --green: #51cf66; --gold: #ffd700; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", sans-serif; background: var(--bg); color: var(--fg); line-height: 1.7; font-size: 16px; }
+    .container { max-width: 580px; margin: 0 auto; position: relative; overflow: hidden; min-height: 100vh; padding: 24px; }
+
+    /* 背景动画 */
+    .bg-grid { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.15; pointer-events: none; z-index: 0; }
+
+    h1 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 4px; position: relative; z-index: 1; }
+    .subtitle { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 20px; position: relative; z-index: 1; }
+
+    /* 步骤导航 */
+    .steps-nav { display: flex; gap: 6px; margin-bottom: 20px; position: relative; z-index: 1; flex-wrap: wrap; justify-content: center; }
+    .step-tag { padding: 6px 12px; background: #111; border: 1px solid var(--border); border-radius: 20px; font-size: 11px; color: var(--muted); transition: all 0.3s; }
+    .step-tag.active { background: var(--accent); color: #000; border-color: var(--accent); }
+    .step-tag.done { background: var(--green); color: #000; border-color: var(--green); }
+
+    /* 进度条 */
+    .progress-wrap { margin-bottom: 20px; position: relative; z-index: 1; }
+    .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); transition: width 0.5s ease; }
+    .progress-text { font-size: 11px; color: var(--muted); margin-top: 6px; text-align: center; }
+
+    /* 题目卡片 */
+    .card-container { position: relative; z-index: 1; }
+    .card { position: absolute; width: 100%; opacity: 0; transform: translateY(20px); transition: all 0.4s ease; pointer-events: none; }
+    .card.active { position: relative; opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .card.exit-up { transform: translateY(-30px); opacity: 0; }
+
+    .card-inner { background: #0a0a0a; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .card-step { font-size: 11px; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+    .card-title { font-size: 17px; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
+    .card-desc { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+    /* 数据展示 */
+    .data-badge { display: inline-block; background: rgba(41, 151, 255, 0.1); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 6px; }
+    .data-highlight { color: var(--gold); font-weight: 600; }
+
+    /* 选项 */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option { background: #111; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; }
+    .option:hover { border-color: var(--accent); background: #151515; }
+    .option.correct { border-color: var(--green); background: rgba(81, 207, 102, 0.1); }
+    .option.wrong { border-color: var(--red); background: rgba(255, 107, 107, 0.1); opacity: 0.5; }
+    .option.disabled { pointer-events: none; }
+    .option-title { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .option-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+    .option-tag.correct { background: var(--green); color: #000; }
+    .option-tag.wrong { background: var(--red); color: #fff; }
+
+    /* 解析 */
+    .explanation { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); animation: slideIn 0.3s ease; }
+    .explanation.show { display: block; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .exp-title { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 10px; }
+    .exp-content { font-size: 13px; color: #888; line-height: 1.7; }
+    .exp-content p { margin-bottom: 8px; }
+    .tip { margin-top: 12px; padding: 10px 12px; background: rgba(41, 151, 255, 0.08); border-radius: 6px; font-size: 12px; color: var(--accent); border-left: 2px solid var(--accent); }
+
+    /* 开始界面 */
+    .start-screen { text-align: center; padding: 40px 0; position: relative; z-index: 1; }
+    .start-screen p { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+    .start-btn { background: var(--accent); color: #000; border: none; padding: 14px 40px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 20px; }
+
+    /* 结果界面 */
+    .result-screen { display: none; text-align: center; padding: 40px 20px; position: relative; z-index: 1; }
+    .result-screen.active { display: block; }
+    .result-score { font-size: 56px; font-weight: 700; color: var(--gold); }
+    .result-max { font-size: 16px; color: var(--muted); }
+    .result-msg { font-size: 15px; color: #888; margin: 20px 0; line-height: 1.6; }
+    .stats { display: flex; justify-content: center; gap: 40px; margin: 24px 0; }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 11px; color: var(--muted); }
+    .restart-btn { background: var(--accent); color: #000; border: none; padding: 12px 32px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+    /* 下一步按钮 */
+    .next-btn { display: none; width: 100%; background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+    .next-btn.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="container">
+    <h1>AI 编程修炼五步法</h1>
+    <p class="subtitle">基于你的 215 个会话、1015 小时使用数据</p>
+
+    <!-- 开始界面 -->
+    <div class="start-screen" id="start">
+      <p>你累计工作了 <span class="data-highlight">1015 小时</span></p>
+      <p>完成了 <span class="data-highlight">215 个会话</span></p>
+      <p>但完全完成的任务只有 <span class="data-highlight">8%</span></p>
+      <p style="margin-top:20px;color:#666;font-size:13px;">问题出在哪里？</p>
+      <p style="color:#666;font-size:13px;">这 20 关，帮你重新理解编程</p>
+      <button class="start-btn" onclick="startGame()">开始闯关</button>
+    </div>
+
+    <!-- 步骤导航 -->
+    <div class="steps-nav" id="stepsNav" style="display:none;">
+      <span class="step-tag" data-step="1">1. 产品设计</span>
+      <span class="step-tag" data-step="2">2. 技术方案</span>
+      <span class="step-tag" data-step="3">3. 编码</span>
+      <span class="step-tag" data-step="4">4. 代码评审</span>
+      <span class="step-tag" data-step="5">5. 测试</span>
+    </div>
+
+    <!-- 进度条 -->
+    <div class="progress-wrap" id="progressWrap" style="display:none;">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:5%"></div></div>
+      <div class="progress-text" id="progressText">1 / 20</div>
+    </div>
+
+    <div class="card-container" id="cardContainer"></div>
+
+    <!-- 结果界面 -->
+    <div class="result-screen" id="resultScreen">
+      <div class="result-score" id="resultScore">0</div>
+      <div class="result-max">满分 200</div>
+      <div class="stats">
+        <div class="stat-item"><div class="stat-num" id="correctNum">0</div><div class="stat-label">答对</div></div>
+        <div class="stat-item"><div class="stat-num" id="wrongNum">0</div><div class="stat-label">答错</div></div>
+      </div>
+      <div class="result-msg" id="resultMsg"></div>
+      <button class="restart-btn" onclick="location.reload()">再来一次</button>
+    </div>
+  </div>
+
+  <script>
+    // 20 道题，基于 PDF 数据 + 5 步流程
+    const questions = [
+      // ===== 第1步：产品设计 =====
+      {
+        step: 1, title: "你做产品设计的频率",
+        desc: "根据你的数据，215个会话中有多少是真正做了产品设计的？",
+        options: [
+          "A. 几乎不做，直接开干",
+          "B. 偶尔做，看心情",
+          "C. 每次都做"
+        ],
+        correct: 0,
+        explanation: `<p><strong style="color:var(--green)">答案是 A。</strong>根据洞察报告，你最大的效率陷阱就是<strong>一上来就写代码</strong>。产品设计阶段几乎缺失，这导致后面反复推倒重来。</p>
+          <p style="margin-top:8px"><strong>数据：</strong>你经历了 <span class="data-highlight">56 次</span> "选错技术方案" 的摩擦，绝大部分是因为产品阶段没想清楚。</p>`
+      },
+      {
+        step: 1, title: "产品设计应该谁来做",
+        desc: "当你让 CC 做产品设计时，应该让它做什么？",
+        options: [
+          "A. 直接让它写出完整的产品文档",
+          "B. 让它聚焦分析：功能点、用户角色、业务流程",
+          "C. 跳过产品设计阶段"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>产品设计阶段，CC 应该帮你<strong>理清思路</strong>，而不是直接写文档。</p>
+          <p style="margin-top:8px">你总结的规则：<strong>让AI聚焦设计产品的功能点、用户角色、业务流程等；设计好了之后，让AI互相评审。</strong></p>`
+      },
+      {
+        step: 1, title: "产品设计阶段的产出",
+        desc: "产品设计文档应该包含什么？",
+        options: [
+          "A. 页面要哪些模块、每个模块说什么、给谁看、整体调性",
+          "B. 技术选型、数据库设计",
+          "C. 代码怎么写"
+        ],
+        correct: 0,
+        explanation: `<p><strong style="color:var(--green)">答案是 A。</strong>产品设计阶段的产出应该是：</p>
+          <ul style="margin:10px 0;padding-left:16px;color:#888;font-size:13px;">
+            <li>页面要哪些模块</li>
+            <li>每个模块的核心信息</li>
+            <li>目标用户是谁</li>
+            <li>整体调性是什么</li>
+          </ul>
+          <p>技术选型是<strong>第二步：技术方案</strong>的事。</p>`
+      },
+      {
+        step: 1, title: "产品设计的评审",
+        desc: "产品设计方案完成后，应该做什么？",
+        options: [
+          "A. 直接开始写代码",
+          "B. 让AI互相评审",
+          "C. 发给客户看"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>你总结的规则明确说：<strong>设计好了之后，让AI互相评审。</strong></p>
+          <p style="margin-top:8px">这避免了你历史上出现过的问题：做到一半发现方向错了，全部重做。</p>`
+      },
+
+      // ===== 第2步：技术方案 =====
+      {
+        step: 2, title: "技术方案应该包含什么",
+        desc: "进入技术方案阶段，应该让 CC 分析什么？",
+        options: [
+          "A. 用什么技术栈、页面结构、GitHub参考项目",
+          "B. 文案怎么写",
+          "C. 颜色怎么配"
+        ],
+        correct: 0,
+        explanation: `<p><strong style="color:var(--green)">答案是 A。</strong>技术方案阶段的核心问题：</p>
+          <ul style="margin:10px 0;padding-left:16px;color:#888;font-size:13px;">
+            <li>用什么技术栈</li>
+            <li>页面/代码怎么组织</li>
+            <li><strong>GitHub 上有没有现成项目能参考</strong></li>
+            <li>响应式怎么处理</li>
+            <li>动画用什么方案</li>
+          </ul>`
+      },
+      {
+        step: 2, title: "技术方案的最大坑",
+        desc: "你在技术方案阶段踩过的最大坑是什么？",
+        options: [
+          "A. 选错框架（pynput on macOS 26）",
+          "B. 选错颜色",
+          "C. 选错字体"
+        ],
+        correct: 0,
+        explanation: `<p><strong style="color:var(--green)">答案是 A。</strong>这是你摩擦数据的第一名：<span class="data-highlight">56 次</span> 选错技术方案。</p>
+          <p style="margin-top:8px">典型案例：pynput 在 macOS 26 上完全不工作，浪费了整整个会话调试。正确的做法是：<strong>先让 CC 去 GitHub 搜成熟项目参考。</strong></p>`
+      },
+      {
+        step: 2, title: "GitHub 参考的价值",
+        desc: "为什么要让 CC 先搜 GitHub 参考项目？",
+        options: [
+          "A. 为了抄代码",
+          "B. 为了借鉴架构、避免踩坑、加快速度",
+          "C. 为了好玩"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>这是你总结的核心心法：<strong>不要从零造轮子。</strong></p>
+          <p style="margin-top:8px">你的参考项目清单：</p>
+          <ul style="margin:10px 0;padding-left:16px;color:#888;font-size:13px;">
+            <li><strong>Maccy</strong> (18k stars) - 剪贴板管理器</li>
+            <li><strong>BarTranslate</strong> - 菜单栏翻译</li>
+            <li><strong>Rectangle</strong> (28k stars) - 全局快捷键</li>
+            <li><strong>KeyboardShortcuts</strong> - sindresorhus 的快捷键库</li>
+          </ul>`
+      },
+      {
+        step: 2, title: "技术方案的评审",
+        desc: "技术方案完成后，应该做什么？",
+        options: [
+          "A. 直接开始编码",
+          "B. 让AI互相评审，确认方案可行",
+          "C. 发给老板看"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>你总结的规则：<strong>技术方案写好后，让AI互相评审。</strong></p>
+          <p style="margin-top:8px">这避免了你历史上 "pynput on macOS 26" 这种方案看似可行、实际不行的悲剧。</p>`
+      },
+
+      // ===== 第3步：编码 =====
+      {
+        step: 3, title: "编码的正确时机",
+        desc: "什么时候才能开始写代码？",
+        options: [
+          "A. 产品方案和技术方案都收敛后",
+          "B. 想开始就开始",
+          "C. 心情好的时候"
+        ],
+        correct: 0,
+        explanation: `<p><strong style="color:var(--green)">答案是 A。</strong>你总结的规则：<strong>产品方案和技术方案都收敛后，开启 CC 的 plan mode，让它开始给你编码。</strong></p>
+          <p style="margin-top:8px">你的历史数据：跳过前两步直接写代码 → <span class="data-highlight">56 次选错方案</span> → 大量无效工作。</p>`
+      },
+      {
+        step: 3, title: "Plan Mode 的作用",
+        desc: "为什么要用 Plan Mode？",
+        options: [
+          "A. 为了好玩",
+          "B. 为了先出实现计划，你确认后再动手",
+          "C. 为了显得专业"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>Plan Mode 让你在写代码前<strong>先确认实现计划</strong>，避免方向错了写几百行再推翻。</p>
+          <p style="margin-top:8px">典型案例：你说过 "太多bug，重新做" —— 就是因为没有 Plan Mode 阶段。</p>`
+      },
+      {
+        step: 3, title: "编码中的迭代",
+        desc: "编码过程中，正确的迭代方式是什么？",
+        options: [
+          "A. 一次改所有地方",
+          "B. 一次只改一个维度，设检查点",
+          "C. 改完再改"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>这是你踩过的坑：一次改太多 → 改了 A 破坏 B。</p>
+          <p style="margin-top:8px">正确姿势：</p>
+          <ul style="margin:10px 0;padding-left:16px;color:#888;font-size:13px;">
+            <li>先改颜色，确认 → 再改布局</li>
+            <li>先写 hero，确认风格 → 再写其他模块</li>
+            <li>每个检查点都让你确认</li>
+          </ul>`
+      },
+      {
+        step: 3, title: "Prompt 的黄金法则",
+        desc: "根据你的数据，怎么 prompt 效率最高？",
+        options: [
+          "A. 越短越好",
+          "B. 多写一句限定，少返工一小时",
+          "C. 随便说"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>这是你 215 个会话总结的经验：</p>
+          <table style="width:100%;margin:10px 0;font-size:12px;">
+            <tr><td style="color:#666">差：</td><td style="color:#888">帮我做个落地页</td></tr>
+            <tr><td style="color:var(--green)">好：</td><td style="color:#aaa">帮我做个落地页，Apple风格，深色主题，不要emoji</td></tr>
+          </table>
+          <p>你还有 <span class="data-highlight">48 次</span> "误解需求" 的摩擦，大部分是因为 prompt 不够具体。</p>`
+      },
+      {
+        step: 3, title: "审美问题的根源",
+        desc: "CC 默认审美的问题是什么？",
+        options: [
+          "A. 太好看了",
+          "B. 太平庸：蓝白配色、圆角卡片、emoji",
+          "C. 太高端"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>这是你明确在 CLAUDE.md 里禁止的：</p>
+          <ul style="margin:10px 0;padding-left:16px;color:#888;font-size:13px;">
+            <li>绝对不要 emoji 表情包</li>
+            <li>绝对不要卡通图标</li>
+            <li>绝对不要低龄化的视觉元素</li>
+          </ul>
+          <p>你做过 GalGame 风格被否决，截图为证。</p>`
+      },
+
+      // ===== 第4步：代码评审 =====
+      {
+        step: 4, title: "代码评审的价值",
+        desc: "编码完成后，为什么要做代码评审？",
+        options: [
+          "A. 为了浪费时间",
+          "B. 为了抓 bug、安全问题、性能问题",
+          "C. 为了显得专业"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>代码评审能帮你发现：</p>
+          <ul style="margin:10px 0;padding-left:16px;color:#888;font-size:13px;">
+            <li>安全漏洞</li>
+            <li>性能问题</li>
+            <li>代码风格不一致</li>
+            <li>潜在的 bug</li>
+          </ul>
+          <p style="margin-top:8px">你历史上因为代码 bug 导致 <span class="data-highlight">48 次</span> 摩擦，代码评审能大幅减少这个问题。</p>`
+      },
+      {
+        step: 4, title: "代码评审谁来做的",
+        desc: "代码评审应该由谁来做？",
+        options: [
+          "A. 你自己",
+          "B. CC 自己",
+          "C. CC 评审 + 你确认"
+        ],
+        correct: 2,
+        explanation: `<p><strong style="color:var(--green)">答案是 C。</strong>正确的流程：CC 写完后，<strong>让 CC 自己检查一遍</strong>，然后你确认。</p>
+          <p style="margin-top:8px">评审清单：</p>
+          <ul style="margin:10px 0;padding-left:16px;color:#888;font-size:13px;">
+            <li>有没有安全漏洞</li>
+            <li>性能有没有问题</li>
+            <li>代码风格一不一致</li>
+          </ul>`
+      },
+
+      // ===== 第5步：测试 =====
+      {
+        step: 5, title: "测试的必要性",
+        desc: "AI 测试完成后，还要做什么？",
+        options: [
+          "A. 直接上线",
+          "B. 你自己亲手测试",
+          "C. 不用测了"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>你总结的规则明确说：<strong>AI测试没问题，然后你再自己亲手测。</strong></p>
+          <p style="margin-top:8px">残酷现实：你的任务<strong>完全完成率只有 8%</strong>，<span class="data-highlight">38% 是部分完成</span>。AI 测完还是有 bug，这是正常的。</p>`
+      },
+      {
+        step: 5, title: "Bug 反馈的正确方式",
+        desc: "当你测试发现问题，应该怎么告诉 CC？",
+        options: [
+          "A. \"有 bug\"",
+          "B. 截图 + 具体描述：哪个浏览器、什么现象、期望什么",
+          "C. 不说"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>这是你血的教训换来的经验：</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">错误示例：</strong></p>
+          <p style="color:#666;font-size:13px;">"页面有 bug"</p>
+          <p style="margin-top:8px"><strong style="color:var(--green)">正确示例：</strong></p>
+          <p style="color:#aaa;font-size:13px;">"页面在 iPhone 上标题溢出了，截图见附件。<br>渐变色在 Safari 上不显示，Chrome 正常。"</p>`
+      },
+      {
+        step: 5, title: "API 限流的应对",
+        desc: "你被 API 错误中断了多少次？",
+        options: [
+          "A. 1-2 次",
+          "B. 约 10 次",
+          "C. 0 次"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>你被 API 错误（503、429、403）<strong>至少中断了 10 次</strong>。</p>
+          <p style="margin-top:8px">你工作了 1015 小时，10 次中断意味着大量工作打水漂。</p>
+          <p style="margin-top:8px"><strong>解法：</strong>会话开头列好优先级任务清单，<strong>最重要的先做</strong>。把每个会话当作随时可能中断来对待。</p>`
+      },
+      {
+        step: 5, title: "完成率的真相",
+        desc: "你的任务完全完成率是多少？",
+        options: [
+          "A. 50% 以上",
+          "B. 约 8%",
+          "C. 80% 以上"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>数据是残酷的：</p>
+          <table style="width:100%;margin:10px 0;font-size:12px;">
+            <tr><td style="color:#888">完全完成</td><td style="color:var(--green)">8%</td><td style="color:#666">8 次</td></tr>
+            <tr><td style="color:#888">部分完成</td><td style="color:var(--gold)">38%</td><td style="color:#666">37 次</td></tr>
+            <tr><td style="color:#888">基本完成</td><td style="color:var(--accent)">31%</td><td style="color:#666">30 次</td></tr>
+          </table>
+          <p>这就是为什么要在会话开头列优先级——确保最重要的事先做完。</p>`
+      },
+      {
+        step: 5, title: "五步法的最终形态",
+        desc: "完整流程是什么？",
+        options: [
+          "A. 直接写代码",
+          "B. 产品设计 → 技术方案 → Plan Mode编码 → 代码评审 → 测试",
+          "C. 想到什么做什么"
+        ],
+        correct: 1,
+        explanation: `<p><strong style="color:var(--green)">答案是 B。</strong>这是你用 215 个会话、1015 小时总结出来的方法论：</p>
+          <div style="margin:12px 0;padding:12px;background:#111;border-radius:8px;text-align:center;font-size:14px;color:var(--accent);">
+            1. 产品设计 → <span style="color:#666">你确认</span><br>
+            2. 技术方案 → <span style="color:#666">你确认</span><br>
+            3. Plan Mode 编码 → <span style="color:#666">你确认</span><br>
+            4. 代码评审 → <span style="color:#666">AI 检查</span><br>
+            5. 测试 → <span style="color:#666">你亲手测</span>
+          </div>
+          <p>设计先行，编码在后，检查点贯穿始终。</p>`
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+
+    function playSound(type) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      if (type === 'correct') {
+        osc.frequency.setValueAtTime(523, ctx.currentTime);
+        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start(); osc.stop(ctx.currentTime + 0.4);
+      } else {
+        osc.frequency.setValueAtTime(180, ctx.currentTime);
+        osc.frequency.setValueAtTime(140, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        osc.start(); osc.stop(ctx.currentTime + 0.25);
+      }
+    }
+
+    function startGame() {
+      document.getElementById('start').style.display = 'none';
+      document.getElementById('stepsNav').style.display = 'flex';
+      document.getElementById('progressWrap').style.display = 'block';
+      renderCards();
+      showCard(0);
+    }
+
+    function renderCards() {
+      const container = document.getElementById('cardContainer');
+      container.innerHTML = questions.map((q, i) => `
+        <div class="card" id="card${i}">
+          <div class="card-inner">
+            <div class="card-step">${q.step}. ${['产品设计', '技术方案', '编码', '代码评审', '测试'][q.step-1]}</div>
+            <div class="card-title">${q.title}</div>
+            <div class="card-desc">${q.desc}</div>
+            <div class="options">
+              ${q.options.map((opt, j) => `
+                <div class="option" onclick="choose(${i}, ${j})">
+                  <div class="option-title">${opt}</div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="explanation" id="exp${i}">
+              <div class="exp-title">答案解析</div>
+              <div class="exp-content">${q.explanation}</div>
+            </div>
+            <button class="next-btn" id="nextBtn${i}" onclick="nextCard(${i})">下一题 →</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showCard(index) {
+      // 更新步骤标签
+      document.querySelectorAll('.step-tag').forEach((tag, i) => {
+        tag.classList.remove('active', 'done');
+        if (i + 1 === questions[index].step) tag.classList.add('active');
+        if (i + 1 < questions[index].step) tag.classList.add('done');
+      });
+
+      // 更新进度
+      const pct = Math.round((index + 1) / questions.length * 100);
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressText').textContent = `${index + 1} / ${questions.length}`;
+
+      // 显示卡片
+      document.querySelectorAll('.card').forEach((card, i) => {
+        card.classList.remove('active', 'exit-up');
+        if (i === index) card.classList.add('active');
+        if (i < index) card.classList.add('exit-up');
+      });
+    }
+
+    function choose(index, choice) {
+      const q = questions[index];
+      const isCorrect = choice === q.correct;
+
+      if (isCorrect) {
+        score += 10;
+        correctCount++;
+        playSound('correct');
+      } else {
+        wrongCount++;
+        playSound('wrong');
+      }
+
+      // 显示对错
+      const opts = document.querySelectorAll(`#card${index} .option`);
+      opts.forEach((opt, i) => {
+        opt.classList.add('disabled');
+        if (i === q.correct) {
+          opt.classList.add('correct');
+          opt.querySelector('.option-title').innerHTML += ' <span class="option-tag correct">正确</span>';
+        } else if (i === choice && !isCorrect) {
+          opt.classList.add('wrong');
+          opt.querySelector('.option-title').innerHTML += ' <span class="option-tag wrong">错误</span>';
+        }
+      });
+
+      // 显示解析和下一题按钮
+      document.getElementById(`exp${index}`).classList.add('show');
+      document.getElementById(`nextBtn${index}`).classList.add('show');
+    }
+
+    function nextCard(index) {
+      if (index < questions.length - 1) {
+        showCard(index + 1);
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById('stepsNav').style.display = 'none';
+      document.getElementById('progressWrap').style.display = 'none';
+      document.getElementById('cardContainer').style.display = 'none';
+      document.getElementById('resultScreen').classList.add('active');
+      document.getElementById('resultScore').textContent = score;
+      document.getElementById('correctNum').textContent = correctCount;
+      document.getElementById('wrongNum').textContent = wrongCount;
+
+      let msg = '';
+      if (score >= 180) {
+        msg = '你完全掌握了这套方法论。按这个流程走，你的完成率会从 8% 提升到 50%+。';
+      } else if (score >= 140) {
+        msg = '你理解了核心思路。但有些坑你可能还没完全记住。这套方法值得每次都照着做。';
+      } else if (score >= 100) {
+        msg = '你知道了大概方向，但细节还需要强化。建议把五步法打印出来贴墙上。';
+      } else {
+        msg = '你的编程方式需要重构。从下一行代码开始，试着按五步法来。';
+      }
+      document.getElementById('resultMsg').textContent = msg;
+    }
+  </script>
+</body>
+</html>

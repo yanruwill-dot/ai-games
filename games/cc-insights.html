@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CC 修炼之路 - 洞察报告版</title>
+  <style>
+    :root { --bg: #000; --fg: #fff; --muted: #666; --accent: #2997ff; --border: #333; --red: #ff6b6b; --green: #51cf66; --gold: #ffd700; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", sans-serif; background: var(--bg); color: var(--fg); line-height: 1.7; font-size: 16px; padding: 24px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+    .subtitle { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .level-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 12px 16px; background: #111; border-radius: 8px; }
+    .level-num { color: var(--accent); font-weight: 600; font-size: 14px; }
+    .score-display { color: var(--gold); font-weight: 600; font-size: 14px; }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+    .scene { display: none; animation: fadeIn 0.5s; }
+    .scene.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .scene-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .scene-icon { font-size: 20px; }
+    .scene-desc { color: #999; margin-bottom: 20px; font-size: 14px; }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option { background: #111; border: 1px solid var(--border); padding: 14px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .option:hover { border-color: var(--accent); }
+    .option.correct { border-color: var(--green); background: rgba(81, 207, 102, 0.15); }
+    .option.wrong { border-color: var(--red); background: rgba(255, 107, 107, 0.15); opacity: 0.6; }
+    .option.disabled { pointer-events: none; }
+    .option-title { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .option-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+    .option-tag.correct { background: var(--green); color: #000; }
+    .option-tag.wrong { background: var(--red); color: #fff; }
+    .explanation { display: none; margin-top: 16px; padding: 14px; background: #111; border-radius: 8px; border-left: 3px solid var(--accent); }
+    .explanation.show { display: block; animation: slideIn 0.3s; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+    .exp-title { font-weight: 600; color: var(--accent); margin-bottom: 8px; font-size: 13px; }
+    .exp-content { font-size: 13px; color: #999; line-height: 1.6; }
+    .exp-content p { margin-bottom: 6px; }
+    .tip { margin-top: 10px; padding: 10px 12px; background: rgba(41, 151, 255, 0.1); border-radius: 6px; font-size: 12px; color: var(--accent); }
+    .start-screen { text-align: center; padding: 32px 0; }
+    .start-screen p { color: #888; margin-bottom: 12px; font-size: 14px; }
+    .start-btn { background: var(--accent); color: #000; border: none; padding: 14px 40px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+    .final-screen { display: none; text-align: center; padding: 32px; }
+    .final-screen.active { display: block; }
+    .final-score { font-size: 56px; font-weight: 700; color: var(--gold); margin-bottom: 8px; }
+    .final-max { font-size: 18px; color: var(--muted); margin-bottom: 16px; }
+    .final-msg { font-size: 16px; color: #999; margin-bottom: 24px; line-height: 1.6; }
+    .stats-row { display: flex; justify-content: center; gap: 32px; margin: 24px 0; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 24px; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 11px; color: var(--muted); }
+    .restart-btn { background: var(--accent); color: #000; border: none; padding: 12px 32px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CC 修炼之路</h1>
+    <p class="subtitle">基于你的真实使用数据</p>
+
+    <!-- 开始界面 -->
+    <div class="start-screen" id="start">
+      <p>根据你 215 个会话的真实数据</p>
+      <p>找出你踩过的坑和做对的事</p>
+      <p>10 关，每关 10 分</p>
+      <button class="start-btn" onclick="startGame()">开始闯关</button>
+    </div>
+
+    <!-- 进度 -->
+    <div id="gameUI" style="display:none;">
+      <div class="level-info">
+        <span class="level-num" id="levelNum">关卡 1/10</span>
+        <span class="score-display" id="scoreDisplay">0 分</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+    </div>
+
+    <!-- 关卡 1：工作内容 -->
+    <div class="scene" id="scene1">
+      <div class="scene-title"><span class="scene-icon">📊</span>关卡 1：你主要做什么</div>
+      <div class="scene-desc">根据洞察报告，你花最多时间在哪个领域？</div>
+      <div class="options">
+        <div class="option" onclick="choose(1, 0)">
+          <div class="option-title">A. 写文档和教程</div>
+        </div>
+        <div class="option" onclick="choose(1, 1)">
+          <div class="option-title">B. macOS 应用开发</div>
+        </div>
+        <div class="option" onclick="choose(1, 2)">
+          <div class="option-title">C. 落地页设计</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp1">
+        <div class="exp-title">正确答案：B</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>macOS 工具应用开发用了 14 个会话，是最多的。</p>
+          <p style="margin-top:6px"><strong style="color:var(--muted)">数据：</strong>macOS 开发 14 次 > 教学内容 12 次 > 落地页 8 次</p>
+        </div>
+        <div class="tip">💡 你一直在尝试做自己的工具，但 macOS 开发确实是最难啃的骨头。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 2：最大摩擦 -->
+    <div class="scene" id="scene2">
+      <div class="scene-title"><span class="scene-icon">🔥</span>关卡 2：最大的问题是什么</div>
+      <div class="scene-desc">摩擦事件中，最频繁的是哪种？</div>
+      <div class="options">
+        <div class="option" onclick="choose(2, 0)">
+          <div class="option-title">A. 代码有 bug</div>
+        </div>
+        <div class="option" onclick="choose(2, 1)">
+          <div class="option-title">B. 选错技术方案</div>
+        </div>
+        <div class="option" onclick="choose(2, 2)">
+          <div class="option-title">C. CC 误解我的需求</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp2">
+        <div class="exp-title">正确答案：B</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>选错技术方案 56 次，是最多的。</p>
+          <p style="margin-top:6px"><strong style="color:var(--muted)">数据：</strong>选错方案 56 次 > 误解需求 48 次 > 代码 bug 48 次</p>
+        </div>
+        <div class="tip">💡 典型案例：pynput 在 macOS 26 上完全不工作，浪费了整整个会话调试。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 3：macOS 框架 -->
+    <div class="scene" id="scene3">
+      <div class="scene-title"><span class="scene-icon">🍎</span>关卡 3：macOS 开发应该用啥</div>
+      <div class="scene-desc">根据历史教训，macOS 原生开发应该用？</div>
+      <div class="options">
+        <div class="option" onclick="choose(3, 0)">
+          <div class="option-title">A. Python + pynput</div>
+        </div>
+        <div class="option" onclick="choose(3, 1)">
+          <div class="option-title">B. Swift + AppKit</div>
+        </div>
+        <div class="option" onclick="choose(3, 2)">
+          <div class="option-title">C. 先搜 GitHub 参考项目</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp3">
+        <div class="exp-title">正确答案：C</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ C 正确：</strong>先搜 GitHub 参考项目（BarTranslate、Maccy），不要从零造轮子。</p>
+          <p style="margin-top:6px"><strong style="color:var(--red)">✗ A 是坑：</strong>pynput 在 macOS 26 上有权限问题，是历史上最大的坑。</p>
+        </div>
+        <div class="tip">💡 不要重复踩坑：Maccy 18k stars、BarTranslate 直接能抄。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 4：内容创作 -->
+    <div class="scene" id="scene4">
+      <div class="scene-title"><span class="scene-icon">✍️</span>关卡 4：内容创作正确姿势</div>
+      <div class="scene-desc">让 CC 写内容前，应该怎么做？</div>
+      <div class="options">
+        <div class="option" onclick="choose(4, 0)">
+          <div class="option-title">A. 直接给需求，让它发挥</div>
+        </div>
+        <div class="option" onclick="choose(4, 1)">
+          <div class="option-title">B. 先问清楚：受众、语气、参考文档</div>
+        </div>
+        <div class="option" onclick="choose(4, 2)">
+          <div class="option-title">C. 先出大纲，确认后再写</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp4">
+        <div class="exp-title">正确答案：B 或 C 都对</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>先问清楚受众、语气，避免写错方向。</p>
+          <p style="margin-top:6px"><strong style="color:var(--green)">✓ C 正确：</strong>先出大纲确认，避免写到一半发现不对。</p>
+          <p style="margin-top:6px"><strong style="color:var(--red)">✗ A 是坑：</strong>历史上出现过"公司介绍"写成"个人介绍"的悲剧。</p>
+        </div>
+        <div class="tip">💡 洞察报告建议你：创建内容前先问清楚 4 个问题。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 5：迭代问题 -->
+    <div class="scene" id="scene5">
+      <div class="scene-title"><span class="scene-icon">🔄</span>关卡 5：迭代常见坑</div>
+      <div class="scene-desc">以下哪个是迭代中的典型问题？</div>
+      <div class="options">
+        <div class="option" onclick="choose(5, 0)">
+          <div class="option-title">A. 一次改太多地方</div>
+        </div>
+        <div class="option" onclick="choose(5, 1)">
+          <div class="option-title">B. 每次只改一个地方</div>
+        </div>
+        <div class="option" onclick="choose(5, 2)">
+          <div class="option-title">C. 让 CC 自己发挥</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp5">
+        <div class="exp-title">正确答案：A</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ A 是坑：</strong>一次改太多 = 改了 A 破坏 B。</p>
+          <p style="margin-top:6px"><strong style="color:var(--green)">✓ B 是对：</strong>一次只改一个维度，确认后再改下一个。</p>
+          <p style="margin-top:6px"><strong style="color:var(--red)">✗ C 是大坑：</strong>让 CC 自由发挥 = 大概率不是你想要的。</p>
+        </div>
+        <div class="tip">💡 正确姿势：设检查点，每轮只改一个维度。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 6：完成率 -->
+    <div class="scene" id="scene6">
+      <div class="scene-title"><span class="scene-icon">📈</span>关卡 6：任务完成情况</div>
+      <div class="scene-desc">你的任务"完全完成"的比例是多少？</div>
+      <div class="options">
+        <div class="option" onclick="choose(6, 0)">
+          <div class="option-title">A. 50% 以上</div>
+        </div>
+        <div class="option" onclick="choose(6, 1)">
+          <div class="option-title">B. 约 8%</div>
+        </div>
+        <div class="option" onclick="choose(6, 2)">
+          <div class="option-title">C. 30% 左右</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp6">
+        <div class="exp-title">正确答案：B</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>完全完成只有 8%，38% 是部分完成。</p>
+          <p style="margin-top:6px"><strong style="color:var(--muted)">数据：</strong>部分完成 37 次 > 基本完成 30 次 > 完全完成 8 次</p>
+        </div>
+        <div class="tip">💡 这就是为什么要在会话开头列优先级——确保最重要的事先做完。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 7：设计审美 -->
+    <div class="scene" id="scene7">
+      <div class="scene-title"><span class="scene-icon">🎨</span>关卡 7：设计审美</div>
+      <div class="scene-desc">CC 默认审美有什么问题？</div>
+      <div class="options">
+        <div class="option" onclick="choose(7, 0)">
+          <div class="option-title">A. 太好看了</div>
+        </div>
+        <div class="option" onclick="choose(7, 1)">
+          <div class="option-title">B. 太平庸：蓝白配色、圆角卡片、emoji</div>
+        </div>
+        <div class="option" onclick="choose(7, 2)">
+          <div class="option-title">C. 太高端</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp7">
+        <div class="exp-title">正确答案：B</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>CC 默认审美就是平庸：蓝白配色 + 圆角卡片 + emoji 标题。</p>
+          <p style="margin-top:6px"><strong style="color:var(--red)">✗ 历史教训：</strong>你做过 GalGame 风格被否决，截图为证。</p>
+        </div>
+        <div class="tip">💡 解法：在 CLAUDE.md 写死你的审美要求（Apple/Tesla 风格）。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 8：开发流程 -->
+    <div class="scene" id="scene8">
+      <div class="scene-title"><span class="scene-icon">📋</span>关卡 8：正确开发流程</div>
+      <div class="scene-desc">复杂任务的正确流程是？</div>
+      <div class="options">
+        <div class="option" onclick="choose(8, 0)">
+          <div class="option-title">A. 直接写代码</div>
+        </div>
+        <div class="option" onclick="choose(8, 1)">
+          <div class="option-title">B. 产品设计 → 技术方案 → 编码</div>
+        </div>
+        <div class="option" onclick="choose(8, 2)">
+          <div class="option-title">C. 先调研再写</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp8">
+        <div class="exp-title">正确答案：B</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>洞察报告建议的完整流程：产品设计 → 技术方案 → Plan Mode → 编码 → 评审 → 测试。</p>
+          <p style="margin-top:6px"><strong style="color:var(--red)">✗ A 是坑：</strong>跳过前两步直接写代码，是最大的效率陷阱。</p>
+        </div>
+        <div class="tip">💡 设计先行，编码在后。这是你总结的心法。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 9：API 限流 -->
+    <div class="scene" id="scene9">
+      <div class="scene-title"><span class="scene-icon">⚡</span>关卡 9：API 限流问题</div>
+      <div class="scene-desc">你被 API 错误干扰了多少次？</div>
+      <div class="options">
+        <div class="option" onclick="choose(9, 0)">
+          <div class="option-title">A. 1-2 次</div>
+        </div>
+        <div class="option" onclick="choose(9, 1)">
+          <div class="option-title">B. 约 10 次</div>
+        </div>
+        <div class="option" onclick="choose(9, 2)">
+          <div class="option-title">C. 几乎没遇到</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp9">
+        <div class="exp-title">正确答案：B</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>至少 10 次会话被 API 错误（503、429、403）中断。</p>
+          <p style="margin-top:6px"><strong style="color:var(--muted)">影响：</strong>你工作了 1015 小时，10 次中断意味着大量工作打水漂。</p>
+        </div>
+        <div class="tip">💡 解法：会话开头列优先级，最重要的先做。当作随时会断。</div>
+      </div>
+    </div>
+
+    <!-- 关卡 10：满意度 -->
+    <div class="scene" id="scene10">
+      <div class="scene-title"><span class="scene-icon">😀</span>关卡 10：最终复盘</div>
+      <div class="scene-desc">你的"不满意"比例是多少？</div>
+      <div class="options">
+        <div class="option" onclick="choose(10, 0)">
+          <div class="option-title">A. 20% 左右</div>
+        </div>
+        <div class="option" onclick="choose(10, 1)">
+          <div class="option-title">B. 约 36%</div>
+        </div>
+        <div class="option" onclick="choose(10, 2)">
+          <div class="option-title">C. 5% 以下</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp10">
+        <div class="exp-title">正确答案：B</div>
+        <div class="exp-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>不满意 71 次 vs 可能满意 128 次 = 约 36% 不满意率。</p>
+          <p style="margin-top:6px"><strong style="color:var(--muted)">解读：</strong>不满意的点主要来自选错方案和误解需求，不是工具本身的问题。</p>
+        </div>
+        <div class="tip">💡 解决这 56 次"选错方案"，效率能翻倍。</div>
+      </div>
+    </div>
+
+    <!-- 最终结果 -->
+    <div class="final-screen" id="final">
+      <div class="final-score" id="finalScore">0</div>
+      <div class="final-max">满分 100</div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-value" id="correctCount">0</div><div class="stat-label">答对</div></div>
+        <div class="stat"><div class="stat-value" id="wrongCount">0</div><div class="stat-label">答错</div></div>
+      </div>
+      <div class="final-msg" id="finalMsg"></div>
+      <button class="restart-btn" onclick="location.reload()">再闯一次</button>
+    </div>
+  </div>
+
+  <script>
+    let score = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    const total = 10;
+    // 每个关卡的正确答案索引
+    const answers = [1, 1, 2, 1, 0, 1, 1, 1, 1, 1];
+
+    function playSound(type) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      if (type === 'correct') {
+        osc.frequency.setValueAtTime(523, ctx.currentTime);
+        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start(); osc.stop(ctx.currentTime + 0.4);
+      } else {
+        osc.frequency.setValueAtTime(180, ctx.currentTime);
+        osc.frequency.setValueAtTime(140, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        osc.start(); osc.stop(ctx.currentTime + 0.25);
+      }
+    }
+
+    function startGame() {
+      document.getElementById('start').style.display = 'none';
+      document.getElementById('gameUI').style.display = 'block';
+      showScene(1);
+    }
+
+    function showScene(n) {
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+      document.getElementById('scene' + n).classList.add('active');
+      document.getElementById('levelNum').textContent = '关卡 ' + n + '/' + total;
+      document.getElementById('progressFill').style.width = (n * 10) + '%';
+    }
+
+    function choose(scene, choice) {
+      const correct = answers[scene - 1];
+      const isCorrect = choice === correct;
+
+      if (isCorrect) {
+        score += 10;
+        correctCount++;
+        playSound('correct');
+      } else {
+        wrongCount++;
+        playSound('wrong');
+      }
+
+      // 显示对错
+      const opts = document.querySelectorAll('#scene' + scene + ' .option');
+      opts.forEach((opt, i) => {
+        opt.classList.add('disabled');
+        if (i === correct) {
+          opt.classList.add('correct');
+          opt.querySelector('.option-title').innerHTML += ' <span class="option-tag correct">正确</span>';
+        } else if (i === choice && !isCorrect) {
+          opt.classList.add('wrong');
+          opt.querySelector('.option-title').innerHTML += ' <span class="option-tag wrong">错误</span>';
+        }
+      });
+
+      document.getElementById('exp' + scene).classList.add('show');
+      document.getElementById('scoreDisplay').textContent = score + ' 分';
+
+      setTimeout(() => {
+        if (scene < total) {
+          showScene(scene + 1);
+        } else {
+          showFinal();
+        }
+      }, 2800);
+    }
+
+    function showFinal() {
+      document.getElementById('gameUI').style.display = 'none';
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+      document.getElementById('final').classList.add('active');
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('correctCount').textContent = correctCount;
+      document.getElementById('wrongCount').textContent = wrongCount;
+
+      let msg = '';
+      if (score === 100) {
+        msg = '满分！你对自己的使用习惯了如指掌。';
+      } else if (score >= 80) {
+        msg = '很棒！你已经吸收了洞察报告的核心教训。';
+      } else if (score >= 60) {
+        msg = '及格了。看看错的都是你踩过的坑，值得反思。';
+      } else {
+        msg = '不及格。看来你需要再读一遍洞察报告了。';
+      }
+      document.getElementById('finalMsg').textContent = msg;
+    }
+  </script>
+</body>
+</html>

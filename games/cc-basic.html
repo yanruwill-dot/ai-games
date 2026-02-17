@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 修炼游戏</title>
+  <style>
+    :root { --bg: #000; --fg: #fff; --muted: #666; --accent: #2997ff; --border: #333; --red: #ff6b6b; --green: #51cf66; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", sans-serif; background: var(--bg); color: var(--fg); line-height: 1.7; font-size: 16px; padding: 24px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+    .progress { display: flex; justify-content: center; gap: 8px; margin-bottom: 32px; }
+    .progress-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: all 0.3s; }
+    .progress-dot.active { background: var(--accent); transform: scale(1.2); }
+    .progress-dot.done { background: var(--green); }
+    .scene { display: none; animation: fadeIn 0.5s; }
+    .scene.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .scene-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .scene-desc { color: #999; margin-bottom: 24px; font-size: 15px; }
+    .options { display: flex; flex-direction: column; gap: 12px; }
+    .option { background: #111; border: 1px solid var(--border); padding: 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; opacity: 1; }
+    .option:hover { border-color: var(--accent); background: #1a1a1a; }
+    .option.correct { border-color: var(--green); background: rgba(81, 207, 102, 0.1); }
+    .option.wrong { border-color: var(--red); background: rgba(255, 107, 107, 0.1); opacity: 0.6; }
+    .option.disabled { pointer-events: none; }
+    .option-title { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .option-title .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+    .option-title .tag.correct { background: var(--green); color: #000; }
+    .option-title .tag.wrong { background: var(--red); color: #000; }
+    .option-desc { font-size: 13px; color: var(--muted); }
+    .explanation { display: none; margin-top: 20px; padding: 16px; background: #111; border-radius: 8px; border-left: 3px solid var(--accent); animation: slideIn 0.3s; }
+    .explanation.show { display: block; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+    .explanation-title { font-weight: 600; color: var(--accent); margin-bottom: 8px; font-size: 14px; }
+    .explanation-content { font-size: 13px; color: #999; line-height: 1.6; }
+    .tip { margin-top: 12px; padding: 10px 14px; background: rgba(41, 151, 255, 0.1); border-radius: 6px; font-size: 13px; color: var(--accent); }
+    .result-screen { display: none; text-align: center; padding: 48px 24px; }
+    .result-screen.active { display: block; }
+    .final-score { font-size: 64px; font-weight: 700; color: var(--accent); margin-bottom: 16px; }
+    .final-msg { font-size: 18px; color: #999; margin-bottom: 32px; }
+    .restart-btn { background: var(--accent); color: #000; border: none; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .start-screen { text-align: center; padding: 48px 0; }
+    .start-btn { background: var(--accent); color: #000; border: none; padding: 16px 48px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Claude Code 修炼</h1>
+    <p class="subtitle">一个人干一个团队活的秘密</p>
+
+    <!-- 开始界面 -->
+    <div class="start-screen" id="start">
+      <p style="color:#999;margin-bottom:16px;">5 个场景，每个场景都有正确答案</p>
+      <p style="color:#999;margin-bottom:16px;">选对加分，选错扣分</p>
+      <p style="color:#999;margin-bottom:32px;">选完直接给答案和解析</p>
+      <button class="start-btn" onclick="startGame()">开始</button>
+    </div>
+
+    <!-- 进度 -->
+    <div class="progress" id="progress" style="display:none;">
+      <div class="progress-dot active"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+    </div>
+
+    <!-- 场景 1 -->
+    <div class="scene" id="scene1">
+      <div class="scene-title">场景 1：做个落地页</div>
+      <div class="scene-desc">你要给公司做个产品落地页。以下指令，你会选哪个？</div>
+      <div class="options">
+        <div class="option" onclick="choose(1, 0)">
+          <div class="option-title">A. "帮我做个落地页"</div>
+          <div class="option-desc">简洁明了</div>
+        </div>
+        <div class="option" onclick="choose(1, 1)">
+          <div class="option-title">B. "帮我做个落地页，Apple 风格，深色主题，不要 emoji"</div>
+          <div class="option-desc">多写一句限定</div>
+        </div>
+        <div class="option" onclick="choose(1, 2)">
+          <div class="option-title">C. 先不做页面，先让 CC 做产品设计</div>
+          <div class="option-desc">设计先行</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp1">
+        <div class="explanation-title">正确答案：C</div>
+        <div class="explanation-content">
+          <p><strong style="color:var(--green)">✓ C 正确：</strong>产品设计先行。这是 CC 最大的效率陷阱——一上来就写代码。</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ A 错：</strong>CC 会给你一个平庸的通用模板，蓝白配色、圆角卡片。</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ B 错：</strong>虽然多了限定，但跳过了产品设计阶段。</p>
+        </div>
+        <div class="tip">💡 记住：设计先行，编码在后。这是最大的效率陷阱。</div>
+      </div>
+    </div>
+
+    <!-- 场景 2 -->
+    <div class="scene" id="scene2">
+      <div class="scene-title">场景 2：macOS 翻译应用</div>
+      <div class="scene-desc">你要做个 macOS 菜单栏翻译应用。选哪个？</div>
+      <div class="options">
+        <div class="option" onclick="choose(2, 0)">
+          <div class="option-title">A. 用 Python + pynput</div>
+          <div class="option-desc">Python 熟，pynput 能监听键盘</div>
+        </div>
+        <div class="option" onclick="choose(2, 1)">
+          <div class="option-title">B. 用 Swift + AppKit</div>
+          <div class="option-desc">原生开发，最稳定</div>
+        </div>
+        <div class="option" onclick="choose(2, 2)">
+          <div class="option-title">C. 先让 CC 去 GitHub 搜成熟项目参考</div>
+          <div class="option-desc">不要从零造轮子</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp2">
+        <div class="explanation-title">正确答案：C</div>
+        <div class="explanation-content">
+          <p><strong style="color:var(--green)">✓ C 正确：</strong>先搜 GitHub 参考项目，比自己从零写靠谱一百倍。BarTranslate、Maccy 都是现成的。</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ A 错：</strong>pynput 在 macOS 26 上有权限问题，这是历史上踩过的坑。</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ B 错：</strong>Swift 确实最稳，但应该先找参考项目借鉴架构。</p>
+        </div>
+        <div class="tip">💡 不要从零造轮子。先搜 GitHub。</div>
+      </div>
+    </div>
+
+    <!-- 场景 3 -->
+    <div class="scene" id="scene3">
+      <div class="scene-title">场景 3：CC 写的代码有 bug</div>
+      <div class="scene-desc">CC 写的页面在 iPhone 上显示错位了。怎么说？</div>
+      <div class="options">
+        <div class="option" onclick="choose(3, 0)">
+          <div class="option-title">A. "页面有 bug"</div>
+          <div class="option-desc">简洁</div>
+        </div>
+        <div class="option" onclick="choose(3, 1)">
+          <div class="option-title">B. "在 iPhone 上标题溢出了，截图见附件"</div>
+          <div class="option-desc">具体描述</div>
+        </div>
+        <div class="option" onclick="choose(3, 2)">
+          <div class="option-title">C. "重做"</div>
+          <div class="option-desc">不行就重做</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp3">
+        <div class="explanation-title">正确答案：B</div>
+        <div class="explanation-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>具体描述问题，CC 才能精准修复。哪个浏览器？什么现象？期望什么？</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ A 错：</strong>"有 bug" 这种话等于没说，CC 不知道怎么修。</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ C 错：</strong>可能只是小问题，不需要全部重做。重做 = 可能引入新 bug。</p>
+        </div>
+        <div class="tip">💡 报错不发截图 = 浪费时间。越具体越好修。</div>
+      </div>
+    </div>
+
+    <!-- 场景 4 -->
+    <div class="scene" id="scene4">
+      <div class="scene-title">场景 4：写公司介绍</div>
+      <div class="scene-desc">你要 CC 给智焰科技写一篇公司介绍。怎么说？</div>
+      <div class="options">
+        <div class="option" onclick="choose(4, 0)">
+          <div class="option-title">A. "写一篇公司介绍"</div>
+          <div class="option-desc">CC 应该知道</div>
+        </div>
+        <div class="option" onclick="choose(4, 1)">
+          <div class="option-title">B. "写智焰科技的公司介绍，第三人称，面向企业客户"</div>
+          <div class="option-desc">明确受众和视角</div>
+        </div>
+        <div class="option" onclick="choose(4, 2)">
+          <div class="option-title">C. 不直接写，先问 CC 应该怎么写</div>
+          <div class="option-desc">先明确需求</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp4">
+        <div class="explanation-title">正确答案：B</div>
+        <div class="explanation-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>明确受众和视角，避免写成个人介绍。这是踩过的坑。</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ A 错：</strong>CC 会自由发挥，大概率不是你想要的。</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ C 错：</strong>绕了一圈，直接在 prompt 里说清楚就行。</p>
+        </div>
+        <div class="tip">💡 多写一句限定，少返工一小时。</div>
+      </div>
+    </div>
+
+    <!-- 场景 5 -->
+    <div class="scene" id="scene5">
+      <div class="scene-title">场景 5：复杂任务开始了</div>
+      <div class="scene-desc">你要做一个涉及多模块的项目。怎么做？</div>
+      <div class="options">
+        <div class="option" onclick="choose(5, 0)">
+          <div class="option-title">A. 直接让 CC 开始写代码</div>
+          <div class="option-desc">快</div>
+        </div>
+        <div class="option" onclick="choose(5, 1)">
+          <div class="option-title">B. 用 plan mode，让 CC 先出计划</div>
+          <div class="option-desc">计划先行</div>
+        </div>
+        <div class="option" onclick="choose(5, 2)">
+          <div class="option-title">C. 列好优先级清单，告诉 CC 最重要的事先做</div>
+          <div class="option-desc">防限流</div>
+        </div>
+      </div>
+      <div class="explanation" id="exp5">
+        <div class="explanation-title">正确答案：B 或 C 都对</div>
+        <div class="explanation-content">
+          <p><strong style="color:var(--green)">✓ B 正确：</strong>Plan mode 避免方向错误。先出计划，你确认后再动手。</p>
+          <p style="margin-top:8px"><strong style="color:var(--green)">✓ C 正确：</strong>优先级清单防止限流丢失工作。开头就列好，最重要的先做。</p>
+          <p style="margin-top:8px"><strong style="color:var(--red)">✗ A 错：</strong>直接写代码最容易踩坑，方向错了白干。</p>
+        </div>
+        <div class="tip">💡 正确流程：产品设计 → 技术方案 → Plan Mode → 编码 → 评审 → 测试</div>
+      </div>
+    </div>
+
+    <!-- 最终结果 -->
+    <div class="result-screen" id="final">
+      <div class="final-score" id="finalScore">0</div>
+      <div class="final-msg" id="finalMsg"></div>
+      <button class="restart-btn" onclick="location.reload()">再玩一次</button>
+    </div>
+  </div>
+
+  <script>
+    let score = 0;
+    const total = 5;
+    let current = 0;
+    const correctAnswers = [2, 2, 1, 1, 1]; // 每个场景的正确答案索引
+
+    function playSound(type) {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      if (type === 'correct') {
+        oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+        oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+        oscillator.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.4);
+      } else {
+        oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+        oscillator.frequency.setValueAtTime(150, audioCtx.currentTime + 0.15);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.3);
+      }
+    }
+
+    function startGame() {
+      document.getElementById('start').style.display = 'none';
+      document.getElementById('progress').style.display = 'flex';
+      showScene(1);
+    }
+
+    function showScene(n) {
+      current = n;
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+      document.getElementById('scene' + n).classList.add('active');
+      updateProgress(n);
+    }
+
+    function updateProgress(n) {
+      const dots = document.querySelectorAll('.progress-dot');
+      dots.forEach((dot, i) => {
+        dot.classList.remove('active', 'done');
+        if (i < n - 1) dot.classList.add('done');
+        if (i === n - 1) dot.classList.add('active');
+      });
+    }
+
+    function choose(scene, choice) {
+      const correctIdx = correctAnswers[scene - 1];
+      const isCorrect = choice === correctIdx;
+
+      if (isCorrect) {
+        score += 20;
+        playSound('correct');
+      } else {
+        playSound('wrong');
+      }
+
+      // 显示对错
+      const options = document.querySelectorAll('#scene' + scene + ' .option');
+      options.forEach((opt, i) => {
+        opt.classList.add('disabled');
+        if (i === correctIdx) {
+          opt.classList.add('correct');
+          opt.querySelector('.option-title').innerHTML += ' <span class="tag correct">正确答案</span>';
+        } else if (i === choice && !isCorrect) {
+          opt.classList.add('wrong');
+          opt.querySelector('.option-title').innerHTML += ' <span class="tag wrong">错误</span>';
+        }
+      });
+
+      // 显示解析
+      document.getElementById('exp' + scene).classList.add('show');
+
+      // 2秒后进入下一题
+      setTimeout(() => {
+        if (scene < total) {
+          showScene(scene + 1);
+        } else {
+          showFinal();
+        }
+      }, 2500);
+    }
+
+    function showFinal() {
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+      document.getElementById('progress').style.display = 'none';
+      document.getElementById('final').classList.add('active');
+      document.getElementById('finalScore').textContent = score;
+
+      let msg = '';
+      if (score === 100) {
+        msg = '满分！你完全掌握了 CC 的正确用法。';
+      } else if (score >= 80) {
+        msg = '不错！你已经理解了核心心法。';
+      } else if (score >= 60) {
+        msg = '及格了。但有些坑你可能还没踩过。';
+      } else {
+        msg = '不及格。你就是那种把 CC 当搜索引擎用的人。';
+      }
+      document.getElementById('finalMsg').textContent = msg;
+    }
+  </script>
+</body>
+</html>

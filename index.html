@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 游戏实验室</title>
+<style>
+:root { --bg: #000; --fg: #f5f5f7; --muted: #86868b; --accent: #2997ff; --border: #1d1d1f; --card-bg: #0a0a0a; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hero */
+.hero {
+  text-align: center; padding: 80px 24px 60px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(41,151,255,0.08) 0%, transparent 60%);
+}
+.hero h1 {
+  font-size: 48px; font-weight: 700; letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #fff 0%, #86868b 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+.hero p { color: var(--muted); font-size: 18px; max-width: 500px; margin: 0 auto; }
+
+/* Section */
+.section { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+.section-title {
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  letter-spacing: 3px; text-transform: uppercase; margin-bottom: 24px;
+  padding-left: 2px;
+}
+
+/* Grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+/* Card */
+.card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px 24px; cursor: pointer;
+  transition: all 0.3s ease; text-decoration: none; color: inherit;
+  display: block; position: relative; overflow: hidden;
+}
+.card:hover {
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+.card-tags { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.tag {
+  font-size: 11px; padding: 3px 10px; border-radius: 100px;
+  background: rgba(255,255,255,0.06); color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.tag.blue { background: rgba(41,151,255,0.12); color: var(--accent); }
+.tag.red { background: rgba(196,30,58,0.15); color: #ff6b6b; }
+.tag.gold { background: rgba(201,168,76,0.15); color: #c9a84c; }
+.card h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.2px; }
+.card p { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.card-arrow {
+  position: absolute; top: 28px; right: 24px;
+  font-size: 18px; color: var(--muted); transition: all 0.3s;
+}
+.card:hover .card-arrow { color: var(--fg); transform: translateX(3px); }
+
+/* Footer */
+.footer {
+  text-align: center; padding: 60px 24px 40px;
+  color: var(--muted); font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .hero { padding: 60px 20px 40px; }
+  .hero h1 { font-size: 32px; }
+  .hero p { font-size: 15px; }
+  .grid { grid-template-columns: 1fr; }
+  .section { padding: 30px 16px; }
+}
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>AI 游戏实验室</h1>
+    <p>用游戏的方式学 AI 编程，在剧情中体验历史风云</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">AI 编程学习</div>
+    <div class="grid">
+      <a class="card" href="games/cc-5steps.html">
+        <span class="card-arrow">&rarr;</span>
+        <div class="card-tags">
+          <span class="tag blue">20 关</span>
+          <span class="tag">选择题</span>
+        </div>
+        <h3>AI 编程修炼五步法</h3>
+        <p>从产品设计到自动化测试，五个阶段系统掌握 AI 编程工作流</p>
+      </a>
+      <a class="card" href="games/cc-insights.html">
+        <span class="card-arrow">&rarr;</span>
+        <div class="card-tags">
+          <span class="tag blue">10 关</span>
+          <span class="tag">数据驱动</span>
+        </div>
+        <h3>CC 修炼之路 · 洞察版</h3>
+        <p>基于真实使用数据的 Claude Code 深度测验</p>
+      </a>
+      <a class="card" href="games/cc-basic.html">
+        <span class="card-arrow">&rarr;</span>
+        <div class="card-tags">
+          <span class="tag blue">5 关</span>
+          <span class="tag">入门</span>
+        </div>
+        <h3>Claude Code 修炼游戏</h3>
+        <p>快速上手 Claude Code 的核心概念和最佳实践</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">剧情冒险</div>
+    <div class="grid">
+      <a class="card" href="games/cc-galgame.html">
+        <span class="card-arrow">&rarr;</span>
+        <div class="card-tags">
+          <span class="tag red">12 章</span>
+          <span class="tag">视觉小说</span>
+        </div>
+        <h3>Claude Code 恋爱教学</h3>
+        <p>AI 女友手把手教你编程，在互动剧情中学习 Claude Code</p>
+      </a>
+      <a class="card" href="games/daming-1566.html">
+        <span class="card-arrow">&rarr;</span>
+        <div class="card-tags">
+          <span class="tag gold">5 章</span>
+          <span class="tag">历史权谋</span>
+        </div>
+        <h3>大明1566 · 宫廷风云</h3>
+        <p>嘉靖四十五年，翰林院编修沈默的朝堂生存之路</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">
+    AI 游戏实验室 · 用游戏学 AI
+  </div>
+
+</body>
+</html>

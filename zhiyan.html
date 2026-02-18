@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>智焰科技 ZHIYAN</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --black: #000000;
+  --surface: #0a0a0a;
+  --surface-glass: rgba(20, 20, 20, 0.7);
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.15);
+  --white: #ffffff;
+  --accent: #ff5722;
+  --accent-glow: rgba(255, 87, 34, 0.4);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255,255,255,0.7);
+  --text-muted: rgba(255,255,255,0.5);
+}
+
+html { scroll-behavior: smooth; background: #000000; }
+body {
+  font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+  background: #000000;
+  color: #ffffff;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Enhanced Starfield Canvas */
+#constellation {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: #000000;
+}
+
+/* Nav - Minimal & Floating */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 1.25rem 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(30px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nav-brand {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--white);
+}
+.nav-brand span { color: var(--accent); }
+.nav-links {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+  padding: 0.6rem 1.5rem;
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  letter-spacing: 0.05em;
+  transition: all 0.3s;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.nav-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px var(--accent-glow), 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Hero - Massive & Bold */
+.hero {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 1.5rem 4rem;
+  background: #000000;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,87,34,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 900px; position: relative; z-index: 1; }
+.hero h1 {
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.85) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto 2.5rem;
+  letter-spacing: 0.02em;
+}
+.hero-btns { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; }
+
+/* Hero Images */
+.hero-images {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+.hero-img-card {
+  flex: 1;
+  max-width: 45%;
+  aspect-ratio: 16/9;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  overflow: hidden;
+  position: relative;
+}
+.hero-img-card:hover {
+  border-color: var(--accent);
+  background: rgba(255,87,34,0.05);
+}
+.hero-img-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero-img-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+.hero-img-icon {
+  font-size: 2rem;
+}
+.hero-img-text {
+  font-size: 0.8rem;
+}
+
+.btn-primary {
+  padding: 1rem 2.5rem;
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  letter-spacing: 0.03em;
+  transition: all 0.3s;
+  box-shadow: 0 0 30px var(--accent-glow), 0 4px 20px rgba(0,0,0,0.4);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 50px var(--accent-glow), 0 8px 30px rgba(0,0,0,0.5);
+}
+.btn-ghost {
+  padding: 1rem 2.5rem;
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s;
+  letter-spacing: 0.03em;
+}
+.btn-ghost:hover {
+  border-color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.05);
+}
+
+/* Section - Clean & Minimal */
+section { padding: 6rem 0; position: relative; z-index: 1; background: #000000; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 3rem; }
+.divider { height: 1px; background: var(--border); max-width: 1400px; margin: 0 auto; }
+
+/* Cards Grid - Glass Effect */
+.sec-header { text-align: center; margin-bottom: 4rem; }
+.sec-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.2rem;
+  font-weight: 600;
+}
+.sec-title {
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+.sec-desc {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 520px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+/* About Grid - Sleek & Modern */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+.about-text p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: 0.8rem;
+  font-weight: 400;
+}
+.about-stats { display: flex; gap: 3.5rem; margin-top: 2.5rem; }
+.stat-num {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.about-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Enhanced Orbit Animation */
+.orbit {
+  position: relative;
+  width: 320px;
+  height: 320px;
+}
+.orbit-ring {
+  position: absolute;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  animation: spin 25s linear infinite;
+}
+.orbit-1 { width: 100%; height: 100%; }
+.orbit-2 { width: 65%; height: 65%; top: 17.5%; left: 17.5%; animation-direction: reverse; animation-duration: 18s; }
+.orbit-3 { width: 35%; height: 35%; top: 32.5%; left: 32.5%; animation-duration: 12s; }
+.orbit-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 15px var(--accent-glow), 0 0 30px var(--accent-glow);
+}
+.orbit-1 .orbit-dot { top: -4px; left: 50%; }
+.orbit-2 .orbit-dot { bottom: 12%; right: 18%; }
+.orbit-3 .orbit-dot { top: 50%; left: -4px; }
+.orbit-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.4rem;
+  font-weight: 800;
+  opacity: 0.15;
+  letter-spacing: 0.1em;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Founders - Glass Cards */
+.founders-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.founder-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  backdrop-filter: blur(20px);
+  transition: all 0.4s;
+}
+.founder-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+.founder-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: #1a1a1a;
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.founder-avatar:hover {
+  box-shadow: 0 0 25px var(--accent-glow);
+}
+.founder-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.avatar-upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 4px;
+}
+.founder-avatar:hover .avatar-upload-overlay { opacity: 1; }
+.founder-info h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.3rem; }
+.founder-info p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+.founder-info .title {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Cards 2x2 - Sharp Edges */
+.cards-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.card {
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2rem;
+  transition: all 0.4s;
+  backdrop-filter: blur(20px);
+}
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(255,87,34,0.1);
+}
+.card-num {
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  margin-bottom: 1.2rem;
+  font-weight: 600;
+}
+.card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  letter-spacing: -0.01em;
+}
+.card p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.card-tag {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Cards 3 - B2B */
+.cards-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+.b2b-card {
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2.5rem 2rem;
+  transition: all 0.4s;
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+.b2b-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.b2b-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+}
+.b2b-card:hover::before { opacity: 1; }
+.b2b-idx {
+  font-size: 3.5rem;
+  font-weight: 800;
+  opacity: 0.08;
+  line-height: 1;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.02em;
+}
+.b2b-card h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+.b2b-card p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.b2b-pill {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid rgba(255,87,34,0.3);
+  border-radius: 2px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Global - Enhanced Pyramid */
+.global-visual {
+  margin-top: 2.5rem;
+  aspect-ratio: 21/9;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+}
+
+/* AI能力金字塔 - 三角形+行星环绕 */
+.tool-pyramid {
+  margin-top: 2.5rem;
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3rem 2rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+}
+.tool-pyramid::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,87,34,0.1) 0%, transparent 50%);
+  animation: pyramidGlow 8s ease-in-out infinite;
+}
+@keyframes pyramidGlow {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(10%, 10%); }
+}
+.tool-pyramid h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #ffffff;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.05em;
+}
+
+/* 三角形金字塔 */
+.pyramid-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+.pyramid-triangle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* 真正的三角形 */
+.pyramid-level {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+}
+.pyramid-level:hover {
+  filter: brightness(1.2);
+  transform: scale(1.03);
+  box-shadow: 0 0 40px rgba(255,87,34,0.5);
+}
+.level-1 {
+  background: linear-gradient(135deg, #ff5722 0%, #ff8a65 100%);
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  width: 140px;
+  padding: 1.2rem;
+}
+.level-2 {
+  background: linear-gradient(135deg, #ff7043 0%, #ff8a65 100%);
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  width: 200px;
+  padding: 1.2rem;
+}
+.level-3 {
+  background: linear-gradient(135deg, #ff5722 0%, #e64a19 100%);
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  width: 260px;
+  padding: 1.2rem;
+}
+
+/* 行星环绕 */
+.planet-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  border: 1px dashed rgba(255,87,34,0.2);
+  border-radius: 50%;
+  animation: orbitRotate 25s linear infinite;
+  pointer-events: none;
+}
+@keyframes orbitRotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.planet {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, #ff8a65 0%, #ff5722 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255,87,34,0.9), 0 0 40px rgba(255,87,34,0.5), 0 0 60px rgba(255,87,34,0.3);
+}
+
+/* 智焰部分 */
+.pyramid-us {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.2rem 2rem;
+  background: linear-gradient(135deg, #ff5722 0%, #e64a19 100%);
+  border-radius: 4px;
+  box-shadow: 0 8px 30px rgba(255,87,34,0.5);
+}
+.us-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.us-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.gv-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.gv-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255,87,34,0.6);
+}
+.gv-dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(255,87,34,0.3);
+  border-radius: 50%;
+  animation: ring 2.5s infinite;
+}
+@keyframes ring {
+  0% { transform: translate(-50%,-50%) scale(0.5); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(2); opacity: 0; }
+}
+.gv-dot:nth-child(1) { top: 25%; left: 15%; }
+.gv-dot:nth-child(2) { top: 45%; left: 50%; animation-delay: 0.5s; }
+.gv-dot:nth-child(3) { top: 30%; left: 75%; animation-delay: 1s; }
+.gv-dot:nth-child(4) { top: 65%; left: 30%; animation-delay: 1.5s; }
+.gv-dot:nth-child(5) { top: 55%; left: 80%; animation-delay: 2s; }
+.gv-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,87,34,0.2), transparent);
+}
+.gv-line:nth-child(6) { top: 30%; left: 17%; width: 33%; transform: rotate(3deg); }
+.gv-line:nth-child(7) { top: 50%; left: 52%; width: 22%; transform: rotate(-8deg); }
+.gv-line:nth-child(8) { top: 60%; left: 32%; width: 25%; transform: rotate(5deg); }
+
+/* Tool Cloud - Sleek Chips */
+.tool-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 2.5rem;
+}
+.tool-chip {
+  padding: 0.5rem 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: all 0.3s;
+  color: var(--text-secondary);
+}
+.tool-chip:hover {
+  border-color: var(--accent);
+  color: var(--white);
+  background: rgba(255,87,34,0.1);
+  box-shadow: 0 0 20px rgba(255,87,34,0.2);
+}
+
+/* Clients - Clean Grid */
+.client-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+.cl-card {
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2.2rem;
+  text-align: center;
+  transition: all 0.4s;
+  backdrop-filter: blur(20px);
+}
+.cl-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+.cl-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.03);
+  margin: 0 auto 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  opacity: 0.25;
+  border: 1px solid var(--border);
+}
+.cl-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.6rem; }
+.cl-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.7; }
+
+/* Proof Sections */
+.proof-section { margin-bottom: 2.5rem; }
+.proof-section:last-of-type { margin-bottom: 2rem; }
+.proof-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.proof-subtitle {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: rgba(255,87,34,0.08);
+  padding: 0.3rem 0.8rem;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+
+/* Champion Grid */
+.champion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+.champion-card {
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.5rem;
+  transition: all 0.4s;
+  backdrop-filter: blur(20px);
+}
+.champion-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+.champion-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--accent);
+  opacity: 0.15;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.champion-card h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+.champion-card p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+.champion-result {
+  font-size: 0.8rem;
+  color: var(--accent) !important;
+  font-weight: 500;
+  margin-bottom: 0.6rem !important;
+}
+.champion-quote {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.5;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+}
+
+.award-strip {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-align: center;
+  background: var(--surface-glass);
+  backdrop-filter: blur(20px);
+}
+.award-strip h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.award-strip p { font-size: 0.8rem; color: var(--text-muted); }
+
+/* CTA - Bold & Glowing */
+.cta {
+  padding: 8rem 0;
+  text-align: center;
+  position: relative;
+  background: #000000;
+}
+.cta-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,87,34,0.15) 0%, transparent 60%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.cta h2 {
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  font-weight: 800;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+.cta p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+}
+.cta .btn-primary { display: inline-block; }
+
+/* Footer - Minimal */
+footer {
+  padding: 2rem 0;
+  border-top: 1px solid var(--border);
+  background: #000000;
+}
+.foot-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.foot-copy {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+.foot-links { display: flex; gap: 2rem; }
+.foot-links a {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: color 0.3s;
+}
+.foot-links a:hover { color: var(--white); }
+
+/* Animations - Enhanced Reveal */
+.rv {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rv.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.rv-d1 { transition-delay: 0.1s; }
+.rv-d2 { transition-delay: 0.2s; }
+.rv-d3 { transition-delay: 0.3s; }
+
+/* Responsive - Optimized for All Devices */
+@media (max-width: 1024px) {
+  .container { padding: 0 2rem; }
+  .nav-inner { padding: 0 1.5rem; }
+  .about-grid { gap: 3rem; }
+  .cards-3 { gap: 1rem; }
+}
+
+@media (max-width: 768px) {
+  /* Nav */
+  .nav-inner { padding: 0 1rem; }
+  .nav-links { display: none; }
+  .nav-brand { font-size: 1.8rem; }
+
+  /* Hero */
+  .hero { padding: 6rem 1.5rem 4rem; min-height: auto; }
+  .hero::before { width: 350px; height: 350px; }
+  .hero h1 { font-size: 5rem; margin-bottom: 2rem; font-weight: 900; text-shadow: 0 0 50px rgba(255,87,34,0.6); }
+  .hero p { font-size: 2rem; margin-bottom: 3rem; color: rgba(255,255,255,0.95); }
+  .hero-btns { flex-direction: column; gap: 1.2rem; }
+  .hero-images { flex-direction: column; gap: 0.8rem; margin-top: 2rem; }
+  .hero-img-card { max-width: 100%; aspect-ratio: 16/10; }
+  .hero-img-icon { font-size: 2.5rem; }
+  .hero-img-text { font-size: 1rem; }
+  .btn-primary, .btn-ghost { padding: 1.5rem 3rem; font-size: 1.5rem; }
+
+  /* Section */
+  section { padding: 5rem 0; }
+  .container { padding: 0 1.5rem; }
+  .sec-header { margin-bottom: 3rem; }
+  .sec-label { font-size: 1.1rem; margin-bottom: 1rem; }
+  .sec-title { font-size: 3.5rem; font-weight: 800; }
+  .sec-desc { font-size: 1.6rem; color: rgba(255,255,255,0.85); }
+
+  /* About */
+  .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .about-visual { order: -1; display: flex; justify-content: center; }
+  .orbit { width: 200px; height: 200px; }
+  .about-text p { font-size: 1.6rem; color: rgba(255,255,255,0.9); }
+  .about-stats { gap: 3rem; margin-top: 2.5rem; flex-wrap: wrap; }
+  .stat-num { font-size: 3.5rem; }
+  .stat-label { font-size: 1.2rem; color: rgba(255,255,255,0.75); }
+
+  /* Team */
+  .founders-grid { grid-template-columns: 1fr; gap: 2rem; max-width: 100%; }
+  .founder-card { padding: 2.5rem; gap: 1.5rem; }
+  .founder-avatar { width: 80px; height: 80px; font-size: 1.8rem; border-radius: 16px; }
+  .founder-info h3 { font-size: 1.8rem; }
+  .founder-info p { font-size: 1.4rem; line-height: 1.8; color: rgba(255,255,255,0.85); }
+  .founder-info .title { font-size: 1.1rem; }
+
+  /* Cards 2x2 */
+  .cards-2x2 { grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+  .card { padding: 2.5rem; }
+  .card-num { font-size: 1rem; margin-bottom: 1rem; }
+  .card h3 { font-size: 2rem; margin-bottom: 1rem; font-weight: 700; }
+  .card p { font-size: 1.5rem; line-height: 1.8; color: rgba(255,255,255,0.85); }
+  .card-tag { font-size: 1rem; margin-top: 1.5rem; }
+
+  /* Cards 3 */
+  .cards-3 { grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+  .b2b-card { padding: 2.5rem 2rem; }
+  .b2b-idx { font-size: 4.5rem; margin-bottom: 1.2rem; }
+  .b2b-card h3 { font-size: 1.8rem; }
+  .b2b-card p { font-size: 1.4rem; color: rgba(255,255,255,0.85); }
+  .b2b-pill { font-size: 1rem; margin-top: 1.5rem; }
+
+  /* Global - Pyramid */
+  .global-visual { margin-top: 2rem; }
+  .tool-pyramid { margin-top: 2rem; padding: 2.5rem; }
+  .tool-pyramid h3 { font-size: 2rem; margin-bottom: 2rem; }
+  .level-1 { width: 120px; padding: 1.2rem; font-size: 1.1rem; }
+  .level-2 { width: 200px; padding: 1.2rem; font-size: 1.2rem; }
+  .level-3 { width: 280px; padding: 1.2rem; font-size: 1.3rem; }
+  .planet-orbit { width: 300px; height: 300px; }
+  .planet { width: 22px; height: 22px; }
+  .pyramid-us { flex-direction: column; gap: 0.6rem; padding: 1.5rem 2.5rem; }
+  .us-label { font-size: 1.2rem; }
+  .us-text { font-size: 1.4rem; text-align: center; }
+  .tool-cloud { gap: 0.8rem; margin-top: 2rem; }
+  .tool-chip { padding: 0.6rem 1.2rem; font-size: 1.1rem; }
+
+  /* Clients */
+  .client-row { grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+  .cl-card { padding: 2.5rem; }
+  .cl-icon { width: 70px; height: 70px; font-size: 1.6rem; }
+  .cl-card h3 { font-size: 1.6rem; }
+  .cl-card p { font-size: 1.4rem; color: rgba(255,255,255,0.85); }
+  .proof-section { margin-bottom: 2.5rem; }
+  .proof-title { font-size: 1.7rem; margin-bottom: 1.5rem; flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+  .proof-subtitle { font-size: 1.1rem; }
+  .champion-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+  .champion-card { padding: 2.2rem; }
+  .champion-num { font-size: 3rem; margin-bottom: 0.6rem; }
+  .champion-card h4 { font-size: 1.6rem; }
+  .champion-card p { font-size: 1.3rem; color: rgba(255,87,34,0.95); }
+  .champion-quote { font-size: 1.3rem; padding-top: 1rem; line-height: 1.8; color: rgba(255,255,255,0.85); }
+  .award-strip { margin-top: 2rem; padding: 2.5rem; }
+  .award-strip h3 { font-size: 1.5rem; }
+  .award-strip p { font-size: 1.3rem; color: rgba(255,255,255,0.85); }
+
+  /* CTA */
+  .cta { padding: 6rem 0; }
+  .cta h2 { font-size: 3rem; }
+  .cta p { font-size: 1.6rem; margin-bottom: 2.5rem; }
+  .cta-glow { width: 400px; height: 400px; }
+
+  /* Footer */
+  .foot-inner { flex-direction: column; gap: 1.5rem; text-align: center; padding: 0 1rem; }
+  .foot-copy, .foot-links { font-size: 1.1rem; }
+  .foot-links { justify-content: center; }
+}
+
+/* Large Screen Optimization */
+@media (min-width: 1400px) {
+  section { padding: 5rem 0; }
+  .container { max-width: 1100px; }
+  .hero { padding: 6rem 3rem 4rem; }
+  .sec-header { margin-bottom: 3rem; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="constellation"></canvas>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand">ZHI<span>YAN</span></div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#b2c">B2C</a></li>
+      <li><a href="#b2b">B2B</a></li>
+      <li><a href="#global">Global</a></li>
+      <li><a href="#proof">Proof</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Contact</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <h1 class="rv show">智焰科技</h1>
+    <p class="rv show rv-d1">驾驭全球最顶尖AI工具，赋能中国企业和个人的生产力跃迁</p>
+
+    <!-- 横图展示区域 -->
+    <div class="hero-images rv show rv-d2">
+      <div class="hero-img-card" onclick="document.getElementById('hero-img1').click()">
+        <img id="hero-img-preview-1" src="" alt="点击上传横图1" style="display:none;">
+        <div class="hero-img-placeholder">
+          <span class="hero-img-icon">📷</span>
+          <span class="hero-img-text">点击上传横图1</span>
+        </div>
+        <input type="file" id="hero-img1" accept="image/*" style="display:none" onchange="previewHeroImg(this, 1)">
+      </div>
+      <div class="hero-img-card" onclick="document.getElementById('hero-img2').click()">
+        <img id="hero-img-preview-2" src="" alt="点击上传横图2" style="display:none;">
+        <div class="hero-img-placeholder">
+          <span class="hero-img-icon">📷</span>
+          <span class="hero-img-text">点击上传横图2</span>
+        </div>
+        <input type="file" id="hero-img2" accept="image/*" style="display:none" onchange="previewHeroImg(this, 2)">
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- About -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="sec-label rv">01 — WHO WE ARE</div>
+        <h2 class="sec-title rv">重新定义AI生产力</h2>
+        <p class="rv">智焰科技由两位实干家联合创立。颜汝，智焰科技CEO/AI先行者社群发起人；彭珈琬，曾执掌千人团队的前VP副总裁。我们不仅拥有全球顶尖的技术视野，更具备深厚的商业实战功底。</p>
+        <p class="rv">我们是AI时代的连接者，将硅谷最前沿的AI工具转化为中国企业与个人的核心竞争力。从认知启蒙到落地交付，我们提供的是一套完整的AI进化体系。</p>
+        <div class="about-stats rv">
+          <div class="stat"><div class="stat-num">50+</div><div class="stat-label">服务企业</div></div>
+          <div class="stat"><div class="stat-num">10K+</div><div class="stat-label">AI操盘手培养</div></div>
+          <div class="stat"><div class="stat-num">100+</div><div class="stat-label">全球顶尖AI工具</div></div>
+        </div>
+      </div>
+      <div class="about-visual rv">
+        <div class="orbit">
+          <div class="orbit-ring orbit-1"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring orbit-2"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring orbit-3"><div class="orbit-dot"></div></div>
+          <div class="orbit-center">AI</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Team -->
+<section id="team">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-label rv">02 — CORE TEAM</div>
+      <h2 class="sec-title rv">创始团队</h2>
+      <p class="sec-desc rv">技术基因与商业洞察的深度融合</p>
+    </div>
+    <div class="founders-grid">
+      <div class="founder-card rv">
+        <div class="founder-avatar" onclick="document.getElementById('upload-yanru').click()">
+          <img src="img/yanru.jpg" alt="颜汝" id="img-yanru" onerror="this.style.display='none';this.nextSibling.style.display='block'">
+          <span style="display:none">颜</span>
+          <div class="avatar-upload-overlay">📷</div>
+        </div>
+        <input type="file" id="upload-yanru" accept="image/*" style="display:none" onchange="previewAvatar(this, 'img-yanru')">
+        <div class="founder-info">
+          <h3>颜汝</h3>
+          <p class="title">CEO / 创始人</p>
+          <p>智焰科技CEO · AI先行者社群发起人<br>谷歌全球AI工程师认证<br>清华认证AI讲师<br>视频号教育图书类目TOP3 MCN合伙人，单品月GMV 400万+</p>
+        </div>
+      </div>
+      <div class="founder-card rv">
+        <div class="founder-avatar" onclick="document.getElementById('upload-pengjiawan').click()">
+          <img src="img/pengjiawan.jpg" alt="彭珈琬" id="img-pengjiawan" onerror="this.style.display='none';this.nextSibling.style.display='block'">
+          <span style="display:none">彭</span>
+          <div class="avatar-upload-overlay">📷</div>
+        </div>
+        <input type="file" id="upload-pengjiawan" accept="image/*" style="display:none" onchange="previewAvatar(this, 'img-pengjiawan')">
+        <div class="founder-info">
+          <h3>彭珈琬</h3>
+          <p class="title">创始合伙人</p>
+          <p>曾管理千人团队<br>业绩千万+<br>知名投资公司原VP副总裁</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- B2C -->
+<section id="b2c">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-label rv">03 — FOR INDIVIDUALS</div>
+      <h2 class="sec-title rv">个体AI进化体系</h2>
+      <p class="sec-desc rv">从认知觉醒到能力跃迁，打造AI时代的超级个体</p>
+    </div>
+    <div class="cards-2x2">
+      <div class="card rv">
+        <div class="card-num">01</div>
+        <h3>AI实操闭门会</h3>
+        <p>一年共24次，手把手带你重塑工作流。掌握GPT、Claude、Gemini等顶尖AI工具的核心用法。</p>
+        <span class="card-tag">一年24次</span>
+      </div>
+      <div class="card rv">
+        <div class="card-num">02</div>
+        <h3>AI 操盘手营</h3>
+        <p>培养具备全盘商业视野的超级个体。流量获取、内容生产、转化变现全链路AI赋能。</p>
+        <span class="card-tag">百万收入</span>
+      </div>
+      <div class="card rv">
+        <div class="card-num">03</div>
+        <h3>AI 编程思维</h3>
+        <p>无需代码基础。学会用自然语言编程，构建自动化工作流，实现"一人公司"的终极形态。</p>
+        <span class="card-tag">一人公司</span>
+      </div>
+      <div class="card rv">
+        <div class="card-num">04</div>
+        <h3>AI 先行少年</h3>
+        <p>面向8-18岁青少年的AI启蒙计划。用最前沿的AI工具点燃创造力，培育未来领袖。</p>
+        <span class="card-tag">未来领袖</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- B2B -->
+<section id="b2b">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-label rv">04 — FOR ENTERPRISE</div>
+      <h2 class="sec-title rv">企业AI转型引擎</h2>
+      <p class="sec-desc rv">从战略到执行，一站式AI落地解决方案</p>
+    </div>
+    <div class="cards-3">
+      <div class="b2b-card rv">
+        <div class="b2b-idx">01</div>
+        <h3>企业AI战略内训</h3>
+        <p>为CEO及核心管理层量身定制。3天2夜高密度集训，建立AI认知框架，掌握降本增效方法论。</p>
+        <span class="b2b-pill">企业内训</span>
+      </div>
+      <div class="b2b-card rv">
+        <div class="b2b-idx">02</div>
+        <h3>AI智能体定制</h3>
+        <p>深度融合企业私有数据，构建专属AI员工。1个AI Agent = 30人团队产能。</p>
+        <span class="b2b-pill">智能定制</span>
+      </div>
+      <div class="b2b-card rv">
+        <div class="b2b-idx">03</div>
+        <h3>全域增长内训</h3>
+        <p>破解抖音、小红书、微信等平台流量密码。以AI驱动内容工业化生产，打造增长飞轮。</p>
+        <span class="b2b-pill">增长获客</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Global -->
+<section id="global">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-label rv">05 — GLOBAL VISION</div>
+      <h2 class="sec-title rv">全球AI工具生态</h2>
+      <p class="sec-desc rv">深度驾驭硅谷最前沿的AI能力，让中国企业站在巨人的肩膀上</p>
+    </div>
+
+    <!-- AI能力金字塔 - 三角形+行星环绕 -->
+    <div class="tool-pyramid rv">
+      <h3>全球AI能力金字塔</h3>
+      <div class="pyramid-wrapper">
+        <div class="pyramid-triangle">
+          <div class="pyramid-level level-1">顶尖 · 海外顶级AI</div>
+          <div class="pyramid-level level-2">优秀 · 海外主流AI</div>
+          <div class="pyramid-level level-3">进阶 · 海外新兴AI</div>
+        </div>
+        <div class="planet-orbit">
+          <div class="planet"></div>
+        </div>
+      </div>
+      <div class="pyramid-us">
+        <span class="us-label">智焰</span>
+        <span class="us-text">深度整合 · 落地交付 · 持续赋能</span>
+      </div>
+    </div>
+
+      </div>
+    </div>
+          <div class="comp-col">★★★★★</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-cloud rv">
+      <span class="tool-chip">GPT</span>
+      <span class="tool-chip">Claude</span>
+      <span class="tool-chip">Gemini</span>
+      <span class="tool-chip">Runway</span>
+      <span class="tool-chip">Cursor</span>
+      <span class="tool-chip">Notion AI</span>
+      <span class="tool-chip">Perplexity</span>
+      <span class="tool-chip">Suno</span>
+      <span class="tool-chip">ElevenLabs</span>
+      <span class="tool-chip">Zapier</span>
+      <span class="tool-chip">Make</span>
+      <span class="tool-chip">n8n</span>
+      <span class="tool-chip">Pika</span>
+      <span class="tool-chip">Gamma</span>
+      <span class="tool-chip">Windsurf</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Proof -->
+<section id="proof">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-label rv">06 — PROOF</div>
+      <h2 class="sec-title rv">标杆客户与荣誉</h2>
+      <p class="sec-desc rv">用结果说话，成就客户的每一个里程碑</p>
+    </div>
+
+    <!-- 标杆客户 -->
+    <div class="proof-section rv">
+      <h3 class="proof-title">标杆客户</h3>
+      <div class="client-row">
+        <div class="cl-card">
+          <div class="cl-icon">西</div>
+          <h3>西瓜传媒</h3>
+          <p>中南地区头部MCN，AI赋能后内容产能大幅提升，人力成本显著降低。</p>
+        </div>
+        <div class="cl-card">
+          <div class="cl-icon">硬</div>
+          <h3>上市集团</h3>
+          <p>行业领军企业。AI助力业务效率提升，实现数字化转型升级。</p>
+        </div>
+        <div class="cl-card">
+          <div class="cl-icon">映</div>
+          <h3>映客直播</h3>
+          <p>头部互娱平台。为其打造AI主播矩阵，助力业务增长。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 隐形冠军 -->
+    <div class="proof-section rv">
+      <h3 class="proof-title">隐形冠军企业 <span class="proof-subtitle">3-10亿级 · 多个行业</span></h3>
+      <div class="champion-grid">
+        <div class="champion-card">
+          <div class="champion-num">01</div>
+          <h4>钢铁行业 · 李总</h4>
+          <p class="champion-result">年营收5亿+ · AI赋能生产优化</p>
+          <div class="champion-quote">"通过AI对生产数据进行实时分析，我们优化了工艺参数，减少了材料浪费。智焰的方案很接地气，落地效果符合预期。"</div>
+        </div>
+        <div class="champion-card">
+          <div class="champion-num">02</div>
+          <h4>制造业 · 张总</h4>
+          <p class="champion-result">年营收8亿+ · 智能制造升级</p>
+          <div class="champion-quote">"AI视觉检测系统上线后，质检效率明显提高，漏检率大幅下降。关键是后续维护和升级都很顺畅，合作比较愉快。"</div>
+        </div>
+        <div class="champion-card">
+          <div class="champion-num">03</div>
+          <h4>教育行业 · 刘总</h4>
+          <p class="champion-result">年营收6亿+ · 数字化转型</p>
+          <div class="champion-quote">"智焰帮我们搭建了AI辅助教学系统，学生学习数据可以量化分析了。运营团队反馈日常工作确实更高效了，是有实质帮助的。"</div>
+        </div>
+        <div class="champion-card">
+          <div class="champion-num">04</div>
+          <h4>零售行业 · 王总</h4>
+          <p class="champion-result">年营收10亿+ · 精准营销</p>
+          <div class="champion-quote">"通过AI分析消费者行为，我们的选品和定价策略更科学了。库存周转率有明显提升，资金利用效率也好了不少。"</div>
+        </div>
+        <div class="champion-card">
+          <div class="champion-num">05</div>
+          <h4>金融行业 · 陈总</h4>
+          <p class="champion-result">年营收7亿+ · 风险控制</p>
+          <div class="champion-quote">"AI风控模型帮我们优化了贷款审批流程，坏账率有明显下降。智能客服也减轻了人工压力，整体投入产出比可观。"</div>
+        </div>
+        <div class="champion-card">
+          <div class="champion-num">06</div>
+          <h4>医疗健康 · 周总</h4>
+          <p class="champion-result">年营收5亿+ · 诊疗效率提升</p>
+          <div class="champion-quote">"AI辅助诊疗系统帮医生节省了不少时间，病例分析和报告生成效率提升明显。患者满意度也有所提高，团队比较认可。"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="award-strip rv">
+      <h3>媒体认可</h3>
+      <p>湖南卫视汪涵主持大型创投节目特邀嘉宾 · 湘江新区团委特邀AI讲师</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <div class="cta-glow"></div>
+  <div style="position:relative;z-index:1;">
+    <h2 class="rv">加入AI时代的第一梯队</h2>
+    <p class="rv">与众多企业一起，掌握未来十年的核心竞争力</p>
+    <a href="#" class="btn-primary rv">预约专属咨询 →</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-copy">© 2026 智焰科技 ZHIYAN TECH</div>
+    <div class="foot-links">
+      <a href="#">隐私政策</a>
+      <a href="#">服务条款</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Make all text editable
+document.addEventListener('DOMContentLoaded', function() {
+  const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, li, a, div:not(.orbit):not(.orbit-ring):not(.orbit-dot):not(.gv-grid):not(.nav):not(.foot-inner):not(.tool-tags):not(.tool-cloud):not(.client-row):not(.champion-grid):not(.founders-grid):not(.cards-2x2):not(.cards-3):not(.proof-section):not(.pyramid-container):not(.tool-category-item):not(.tool-pyramid)');
+  textElements.forEach(el => {
+    if (!el.closest('nav') && !el.closest('footer') && !el.classList.contains('orbit-center')) {
+      el.setAttribute('contenteditable', 'true');
+    }
+  });
+});
+
+// Enhanced Starfield Canvas - xAI Style
+const cvs = document.getElementById('constellation');
+const ctx = cvs.getContext('2d');
+let w, h, pts = [], shootingStars = [];
+
+function resize() {
+  w = cvs.width = innerWidth;
+  h = cvs.height = innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Create stars with varying brightness
+for (let i = 0; i < 80; i++) {
+  pts.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    vx: (Math.random() - 0.5) * 0.15,
+    vy: (Math.random() - 0.5) * 0.15,
+    r: Math.random() * 1.5 + 0.3,
+    brightness: Math.random() * 0.5 + 0.3
+  });
+}
+
+// Shooting star functionality
+function createShootingStar() {
+  if (Math.random() > 0.992) {
+    shootingStars.push({
+      x: Math.random() * w,
+      y: Math.random() * h * 0.5,
+      vx: Math.random() * 3 + 2,
+      vy: Math.random() * 2 + 1,
+      length: Math.random() * 80 + 40,
+      alpha: 1
+    });
+  }
+}
+
+function draw() {
+  // Clear with slight fade for trail effect
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+  ctx.fillRect(0, 0, w, h);
+
+  // Draw stars
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Wrap around edges
+    if (p.x < 0) p.x = w;
+    if (p.x > w) p.x = 0;
+    if (p.y < 0) p.y = h;
+    if (p.y > h) p.y = 0;
+
+    // Twinkle effect
+    const twinkle = Math.sin(Date.now() * 0.003 + i) * 0.2 + 0.8;
+
+    // Glow effect for brighter stars
+    if (p.r > 1) {
+      ctx.beginPath();
+      const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3);
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${p.brightness * twinkle})`);
+      gradient.addColorStop(0.3, `rgba(255, 255, 255, ${p.brightness * twinkle * 0.5})`);
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = gradient;
+      ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Core star
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${p.brightness * twinkle})`;
+    ctx.fill();
+  }
+
+  // Draw constellation lines
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    for (let j = i + 1; j < pts.length; j++) {
+      const q = pts[j];
+      const dx = p.x - q.x;
+      const dy = p.y - q.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 100) {
+        const alpha = 0.04 * (1 - dist / 100);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Create and draw shooting stars
+  createShootingStar();
+
+  for (let i = shootingStars.length - 1; i >= 0; i--) {
+    const star = shootingStars[i];
+    star.x += star.vx;
+    star.y += star.vy;
+    star.alpha -= 0.015;
+
+    if (star.alpha <= 0) {
+      shootingStars.splice(i, 1);
+      continue;
+    }
+
+    // Draw shooting star tail
+    ctx.beginPath();
+    const gradient = ctx.createLinearGradient(
+      star.x, star.y,
+      star.x - star.length, star.y - star.length * 0.5
+    );
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${star.alpha})`);
+    gradient.addColorStop(0.5, `rgba(255, 200, 150, ${star.alpha * 0.5})`);
+    gradient.addColorStop(1, 'rgba(255, 150, 100, 0)');
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(star.x, star.y);
+    ctx.lineTo(star.x - star.length, star.y - star.length * 0.5);
+    ctx.stroke();
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+// Reveal - Enhanced animation
+const obs = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('show');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+
+// Avatar upload preview
+function previewAvatar(input, imgId) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById(imgId);
+      if (img) {
+        img.src = e.target.result;
+        img.style.display = 'block';
+        // Hide the fallback span if it was shown
+        const span = img.nextElementSibling;
+        if (span && span.tagName === 'SPAN') {
+          span.style.display = 'none';
+        }
+      }
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Hero image upload preview
+function previewHeroImg(input, num) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById('hero-img-preview-' + num);
+      const placeholder = img.nextElementSibling;
+      if (img) {
+        img.src = e.target.result;
+        img.style.display = 'block';
+        if (placeholder && placeholder.classList.contains('hero-img-placeholder')) {
+          placeholder.style.display = 'none';
+        }
+      }
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+
+</body>
+</html>
